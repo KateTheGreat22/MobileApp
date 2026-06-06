@@ -10,7 +10,7 @@ Here is a breif walkthrough of my code: https://www.youtube.com/watch?v=xm26ouCt
 # Development Environment
 
 For this project, I used Android Studio and mainly worked within the Kotlin language. I also used a little bit of Java to increase functionality. Finally, within
-this project, I expereimented using the Android Studio Assitant to help organize files and proofread my code. 
+this project, I experimented using the Android Studio Assitant to help organize files and proofread my code. 
 
 
 # Useful Websites
