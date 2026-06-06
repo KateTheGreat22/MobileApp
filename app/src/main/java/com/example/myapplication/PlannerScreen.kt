@@ -21,9 +21,12 @@ import android.content.Intent
 
 @Composable
 fun PlannerApp(viewModel: PlannerViewModel) {
+
+    // Tracks which navigation tab is currently selected.
     var selectedTab by remember { mutableIntStateOf(0) }
-    
+
     Scaffold(
+        // Bottom navigation bar used to switch between app screens.
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -51,6 +54,8 @@ fun PlannerApp(viewModel: PlannerViewModel) {
             modifier = Modifier.padding(innerPadding),
             color = MaterialTheme.colorScheme.background
         ) {
+
+            // Display the appropriate screen based on the selected tab.
             when (selectedTab) {
                 0 -> GraduationStepsScreen(viewModel)
                 1 -> PostGradScreen(viewModel)
@@ -62,25 +67,47 @@ fun PlannerApp(viewModel: PlannerViewModel) {
 
 @Composable
 fun GraduationStepsScreen(viewModel: PlannerViewModel) {
+
+    // Observe graduation checklist items from the ViewModel.
     val steps by viewModel.graduationSteps.collectAsState()
-    
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        item { 
-            Text("Graduation Checklist", style = MaterialTheme.typography.headlineMedium)
+
+    // Display all graduation requirements in a scrollable list.
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        item {
+            Text(
+                "Graduation Checklist",
+                style = MaterialTheme.typography.headlineMedium
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
+
         items(steps) { step ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
             ) {
                 Checkbox(
                     checked = step.isCompleted,
+
+                    // Update completion status when the user checks a step.
                     onCheckedChange = { viewModel.toggleStep(step.id) }
                 )
+
                 Column {
-                    Text(step.title, style = MaterialTheme.typography.titleMedium)
-                    Text(step.description, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        step.title,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        step.description,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }
@@ -89,51 +116,85 @@ fun GraduationStepsScreen(viewModel: PlannerViewModel) {
 
 @Composable
 fun PostGradScreen(viewModel: PlannerViewModel) {
+
+    // Observe saved post-graduation plans.
     val plans by viewModel.postGradPlans.collectAsState()
+
+    // Store user input before adding a new plan.
     var title by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Post-Graduation Planning", style = MaterialTheme.typography.headlineMedium)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            "Post-Graduation Planning",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         OutlinedTextField(
             value = title,
             onValueChange = { title = it },
             label = { Text("Plan Title") },
             modifier = Modifier.fillMaxWidth()
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         OutlinedTextField(
             value = desc,
             onValueChange = { desc = it },
             label = { Text("Description") },
             modifier = Modifier.fillMaxWidth()
         )
+
         Button(
-            onClick = { 
+            onClick = {
+
+                // Only create a plan if a title has been entered.
                 if (title.isNotBlank()) {
                     viewModel.addPostGradPlan(title, desc)
+
+                    // Clear the form after saving.
                     title = ""
                     desc = ""
                 }
             },
-            modifier = Modifier.align(Alignment.End).padding(top = 8.dp)
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(top = 8.dp)
         ) {
             Text("Add Plan")
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
 
+        // Display all saved post-graduation plans.
         LazyColumn {
             items(plans) { plan ->
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(plan.title, style = MaterialTheme.typography.titleMedium)
-                        Text(plan.description, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            plan.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            plan.description,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
                     }
                 }
             }
@@ -143,77 +204,159 @@ fun PostGradScreen(viewModel: PlannerViewModel) {
 
 @Composable
 fun TasksScreen(viewModel: PlannerViewModel) {
+
+    // Observe tasks, points, and rewards from the ViewModel.
     val tasks by viewModel.tasks.collectAsState()
     val points by viewModel.points.collectAsState()
     val rewards by viewModel.rewards.collectAsState()
+
+    // Holds the title of a new task before it is added.
     var newTaskTitle by remember { mutableStateOf("") }
 
-    LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         item {
-            Text("Daily Tasks & Rewards", style = MaterialTheme.typography.headlineMedium)
-            Text("Points: $points", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+            Text(
+                "Daily Tasks & Rewards",
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Text(
+                "Points: $points",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 OutlinedTextField(
                     value = newTaskTitle,
                     onValueChange = { newTaskTitle = it },
                     label = { Text("New Task") },
                     modifier = Modifier.weight(1f)
                 )
-                IconButton(onClick = {
-                    if (newTaskTitle.isNotBlank()) {
-                        viewModel.addTask(newTaskTitle)
-                        newTaskTitle = ""
+
+                IconButton(
+                    onClick = {
+
+                        // Add a task only when text has been entered.
+                        if (newTaskTitle.isNotBlank()) {
+                            viewModel.addTask(newTaskTitle)
+
+                            // Clear the text field after adding the task.
+                            newTaskTitle = ""
+                        }
                     }
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Task")
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "Add Task"
+                    )
                 }
             }
         }
 
-        item { Text("Tasks", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 16.dp)) }
-        
+        item {
+            Text(
+                "Tasks",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+
         items(tasks) { task ->
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                Checkbox(checked = task.isCompleted, onCheckedChange = { viewModel.toggleTask(task.id) })
+
+            // Display each task and allow completion tracking.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = task.isCompleted,
+                    onCheckedChange = { viewModel.toggleTask(task.id) }
+                )
+
                 Text(task.title)
+
                 Spacer(Modifier.weight(1f))
-                Text("${task.points} pts", style = MaterialTheme.typography.bodySmall)
+
+                Text(
+                    "${task.points} pts",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
 
-        item { Text("Rewards", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 24.dp)) }
-        
+        item {
+            Text(
+                "Rewards",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 24.dp)
+            )
+        }
+
         items(rewards) { reward ->
+
+            // Determine whether the user has enough points
+            // to unlock this reward.
             val canAfford = points >= reward.pointsRequired
+
             ListItem(
                 headlineContent = { Text(reward.title) },
-                supportingContent = { Text("${reward.pointsRequired} points required") },
+                supportingContent = {
+                    Text("${reward.pointsRequired} points required")
+                },
                 trailingContent = {
                     if (canAfford) {
-                        Text("Available!", color = Color(0xFF4CAF50))
+                        Text(
+                            "Available!",
+                            color = Color(0xFF4CAF50)
+                        )
                     } else {
-                        Text("Locked", color = Color.Gray)
+                        Text(
+                            "Locked",
+                            color = Color.Gray
+                        )
                     }
                 }
             )
         }
-        
+
         item {
             val context = LocalContext.current
+
             Button(
                 onClick = {
+
+                    // Generate a printable summary and share it
+                    // using Android's built-in share sheet.
                     val exportText = viewModel.generateExportText()
+
                     val sendIntent: Intent = Intent().apply {
                         action = Intent.ACTION_SEND
                         putExtra(Intent.EXTRA_TEXT, exportText)
                         type = "text/plain"
                     }
-                    val shareIntent = Intent.createChooser(sendIntent, "Export Planner")
+
+                    val shareIntent = Intent.createChooser(
+                        sendIntent,
+                        "Export Planner"
+                    )
+
                     context.startActivity(shareIntent)
                 },
-                modifier = Modifier.fillMaxWidth().padding(top = 32.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp)
             ) {
                 Text("Save & Export for Printing")
             }
